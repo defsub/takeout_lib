@@ -1,8 +1,28 @@
+// Copyright (C) 2021 The Takeout Authors.
+//
+// This file is part of Takeout.
+//
+// Takeout is free software: you can redistribute it and/or modify it under the
+// terms of the GNU Affero General Public License as published by the Free
+// Software Foundation, either version 3 of the License, or (at your option)
+// any later version.
+//
+// Takeout is distributed in the hope that it will be useful, but WITHOUT ANY
+// WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
+// FOR A PARTICULAR PURPOSE.  See the GNU Affero General Public License for
+// more details.
+//
+// You should have received a copy of the GNU Affero General Public License
+// along with Takeout.  If not, see <https://www.gnu.org/licenses/>.
+
 package com.defsub.takeout.client
 
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
+import java.time.DateTimeException
 import java.time.LocalDate
+import java.time.ZoneId
+import java.time.format.DateTimeFormatter
 
 @Serializable
 data class User(
@@ -54,18 +74,15 @@ data class Track(
 
 fun Track.otherArtwork(): Boolean {
     return if (otherArtwork != null && otherArtwork.isNotEmpty()) {
-        otherArtwork.toBooleanStrict()
+//        otherArtwork.toBooleanStrict()
+        false
     } else {
         false
     }
 }
 
 fun Track.year(): Int {
-    if (date != null) {
-        val d = LocalDate.parse(date)
-        return d.year
-    }
-    return -1
+    return year(date)
 }
 
 fun Track.cover(size: Int = 250): String {
@@ -106,18 +123,15 @@ data class Release(
 
 fun Release.otherArtwork(): Boolean {
     return if (otherArtwork != null && otherArtwork.isNotEmpty()) {
-        otherArtwork.toBooleanStrict()
+//        otherArtwork.toBooleanStrict()
+        false
     } else {
         false
     }
 }
 
 fun Release.year(): Int {
-    if (date != null) {
-        val d = LocalDate.parse(date)
-        return d.year
-    }
-    return -1
+    return year(date)
 }
 
 fun Release.cover(size: Int = 250): String {
@@ -171,8 +185,7 @@ data class Movie(
 )
 
 fun Movie.year(): Int {
-    val d = LocalDate.parse(date)
-    return d.year
+    return year(date)
 }
 
 fun Movie.location(): String {
@@ -329,3 +342,15 @@ data class Playlist(
     @SerialName("image") val image: String? = null,
     @SerialName("track") val tracks: List<Entry>
 )
+
+fun year(date: String?): Int {
+    var year = -1;
+    date?.let {
+        try {
+            val d = LocalDate.parse(date, DateTimeFormatter.ISO_INSTANT.withZone(ZoneId.of("UTC")))
+            year = d.year
+        } catch (e: DateTimeException) {
+        }
+    }
+    return year
+}
